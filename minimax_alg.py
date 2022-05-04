@@ -10,6 +10,7 @@ tile = {
     "2" : "x"
 }
 
+
 def nextTurn(turn):
     return (turn%2) + 1
 
@@ -41,10 +42,20 @@ def score(board,player):
     if isWinner(state,player):
         return 1
 
+def getScore(object):
+    try:
+        if object.score == None:
+            object.score = score(object.state,2)
+        return object.score
+    except:
+        return object
+
+
 class Node():
     def __init__(self,state):
         self.state = state
         self.init_parent = None
+        # self.score = None
 
 class GameState(Node):
     def __init__(self,state,turn):
@@ -53,6 +64,7 @@ class GameState(Node):
 
     def generateMoves(self):
         if gameOver(self.state):
+            # self.score = score(self.state,2)
             return None
         for i in range(9):
             if self.state[i] != EMPTY:
@@ -72,22 +84,47 @@ class GameState(Node):
             temp.insert(i,"\n")
         print(''.join([tile[val] if val != '\n' else '\n' for val in temp]))
 
+# def minimax(start,maximizingPlayer,A=float("-inf"),B=float("inf")):
+#     if gameOver(start.state):
+#         # start.score = score(start,2)
+#         return start
+#
+#     if maximizingPlayer:
+#         value = float("-inf")
+#         for child in start.generateMoves():
+#             value = max(value,minimax(child,False,A,B),key = lambda x : getScore(x))
+#             if getScore(value) >= getScore(B):
+#                 break
+#             A = max(A,value,key = lambda x : getScore(x))
+#     else:
+#         value = float("inf")
+#         for child in start.generateMoves():
+#             value = min(value,minimax(child,True,A,B),key = lambda x : getScore(x))
+#             if getScore(value) <= getScore(A):
+#                 break
+#             B = min(B,value,key = lambda x : getScore(x))
+#     return value
 
-def minimax(start,maximizingPlayer):
+def minimax(start,maximizingPlayer,A=float("-inf"),B=float("inf")):
     if gameOver(start.state):
+        # start.score = score(start.state,2)
         return start
 
     if maximizingPlayer:
-        Eval = float('-inf')
+        value = float("-inf")
         for child in start.generateMoves():
-            val = minimax(child,False)
-            Eval = max(Eval,val,key = lambda x : score(x,2))
+            value = max(value,minimax(child,False,A,B),key = lambda x : score(x,2))
+            if score(value,2) >= score(B,2):
+                break
+            A = max(A,value,key = lambda x : score(x,2))
     else:
-        Eval = float('-inf')
+        value = float("inf")
         for child in start.generateMoves():
-            val = minimax(child,True)
-            Eval = max(Eval,val,key = lambda x : score(x,1))
-    return Eval
+            value = min(value,minimax(child,True,A,B),key = lambda x : score(x,2))
+            if score(value,2) <= score(A,2):
+                break
+            B = min(B,value,key = lambda x : score(x,2))
+    return value
 
 
 # original: 14.14 seconds
@@ -99,6 +136,7 @@ if "__main__" in __name__:
     start = time.time()
     init = GameState("000000000",2)
     resp = minimax(init,True)
+    # resp = minimax(init,True)
     end = time.time()
     print('time: %s'%(end-start))
     print('endgame')

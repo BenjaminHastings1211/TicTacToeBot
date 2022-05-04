@@ -36,6 +36,8 @@ class Board(Tk):
     def reset(self,event):
         print("___NEW _GAME___")
         self.state = randomInitMove()
+        if random.random() > 0:
+            self.state = "000000000"
         self.validTime = True
         self.update()
 
@@ -59,14 +61,11 @@ class Board(Tk):
 
     def botMove(self):
         resp = minimax_alg.minimax(minimax_alg.GameState(self.state,2),True)
-
-        resp.print()
         self.state = resp.init_parent.state
         self.update()
         if minimax_alg.gameOver(resp.init_parent.state):
             self.validTime = False
-            return;
-
+            return
         self.validTime = True
 
 class Tile(Frame):
